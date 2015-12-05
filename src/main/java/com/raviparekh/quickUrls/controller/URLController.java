@@ -1,15 +1,13 @@
 package com.raviparekh.quickUrls.controller;
 
+import com.raviparekh.quickUrls.exceptions.EncodingError;
 import com.raviparekh.quickUrls.exceptions.URLNotFound;
 import com.raviparekh.quickUrls.model.URLForm;
 import com.raviparekh.quickUrls.services.URLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -26,25 +24,20 @@ public class URLController {
     private URLService urlService;
 
     @RequestMapping("/{urlKey}")
-    public RedirectView redirectToFullUrl(HttpServletRequest request, @PathVariable("urlKey") String urlKey) {
-        String fullUrl;
+    public RedirectView redirectToFullUrl(HttpServletRequest request, @PathVariable("urlKey") String urlKey) throws URLNotFound {
 
-        try {
-            fullUrl = urlService.getFullUrl(urlKey);
-        } catch (URLNotFound e) {
-            return new RedirectView(request.getLocalName());
-        }
+        String fullUrl = urlService.getFullUrl(urlKey);
 
         return new RedirectView(fullUrl);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public ModelAndView createShortenURL(HttpServletRequest request, @Valid @ModelAttribute("urlForm") URLForm form, BindingResult result) {
+    public ModelAndView createShortenURL(HttpServletRequest request, @Valid @ModelAttribute("urlForm") URLForm form, BindingResult result) throws EncodingError {
         if (result.hasErrors()) {
             return new ModelAndView("create");
         }
 
-        String URLKey = urlService.createShortenUrl(form.getURL());
+        String URLKey = urlService.createShortenUrl(form.getFullURL());
 
         String shortenUrl = request.getRequestURL().append(URLKey).toString();
 
@@ -52,12 +45,25 @@ public class URLController {
 
         model.put("shortenURL", shortenUrl);
 
-        return new ModelAndView("create", model);
+        return new ModelAndView("url", model);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String getURLCreationView() {
+    public String getURLCreationView(@ModelAttribute("urlForm") URLForm form) {
         return "create";
     }
 
+    @ExceptionHandler({URLNotFound.class})
+    public ModelAndView commonCaseErrorHandler(Exception e) {
+        ModelAndView model = new ModelAndView("error");
+        model.addObject("errorMsg", e.getMessage());
+        return model;
+    }
+
+    @ExceptionHandler({Exception.class})
+    public ModelAndView unexpectedErrorHandler(Exception e) {
+        ModelAndView model = new ModelAndView("error");
+        model.addObject("errorMsg", "Unexpected error");
+        return model;
+    }
 }

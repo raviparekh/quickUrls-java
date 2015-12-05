@@ -1,11 +1,12 @@
 package com.raviparekh.quickUrls.services;
 
 
+import com.raviparekh.quickUrls.exceptions.EncodingError;
 import com.raviparekh.quickUrls.exceptions.URLNotFound;
 
 public interface URLService {
 
     String getFullUrl(String urlKey) throws URLNotFound;
 
-    String createShortenUrl(String fullURL);
+    String createShortenUrl(String fullURL) throws EncodingError;
 }

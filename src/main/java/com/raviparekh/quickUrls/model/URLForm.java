@@ -10,14 +10,13 @@ public class URLForm {
     @NotEmpty
     @NotNull
     @URL
-    private String URL;
+    private String fullURL;
 
-
-    public String getURL() {
-        return URL;
+    public String getFullURL() {
+        return fullURL;
     }
 
-    public void setURL(String URL) {
-        this.URL = URL;
+    public void setFullURL(String fullURL) {
+        this.fullURL = fullURL;
     }
 }

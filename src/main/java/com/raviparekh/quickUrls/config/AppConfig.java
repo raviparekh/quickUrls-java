@@ -8,7 +8,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "com.raviparekh.quickUrls")
 public class AppConfig {
 
     @Bean

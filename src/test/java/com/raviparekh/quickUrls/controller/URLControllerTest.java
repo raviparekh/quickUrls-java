@@ -17,9 +17,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class URLControllerTest {
@@ -54,8 +52,8 @@ public class URLControllerTest {
         when(urlService.getFullUrl(any(String.class))).thenThrow(URLNotFound.class);
 
         mockMvc.perform(get("/url/123a"))
-                .andExpect(status().is(302))
-                .andExpect(MockMvcResultMatchers.redirectedUrl("localhost"));
+                .andExpect(status().is(200))
+                .andExpect(view().name("error"));
 
     }
 
@@ -64,9 +62,9 @@ public class URLControllerTest {
         String expectedRedirectUrl = "http://google.co.uk/12351212";
         when(urlService.createShortenUrl(expectedRedirectUrl)).thenReturn("123a");
 
-        mockMvc.perform(post("/url/").param("URL", expectedRedirectUrl))
+        mockMvc.perform(post("/url/").param("fullURL", expectedRedirectUrl))
                 .andExpect(status().isOk())
-                .andExpect(view().name("create"))
+                .andExpect(view().name("url"))
                 .andExpect(model().attribute("shortenURL", "http://localhost/url/123a"));
 
     }
